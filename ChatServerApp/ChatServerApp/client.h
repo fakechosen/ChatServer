@@ -6,8 +6,8 @@ class client
 {
 	SOCKET comSocket;
 
-	int port;
-	int address;
+	uint16_t port;
+	std::string address;
 
 public:
 	void StartClient();

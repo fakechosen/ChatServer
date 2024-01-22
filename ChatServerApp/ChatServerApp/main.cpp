@@ -30,7 +30,8 @@ int main()
 	//Client
 	if (choice == 2)
 	{
-		std::cout << ("welcome client");
+		std::cout << ("welcome client!\n");
+
 		client myClient;
 		myClient.StartClient();
 	}

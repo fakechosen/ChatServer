@@ -1,6 +1,7 @@
 #define _WINSOCK_DEPRECATED_NO_WARNINGS         // turns of deprecated warnings for winsock
 
 #include <iostream>
+#include <string>
 #include "client.h"
 
 
@@ -39,9 +40,38 @@ int tcp_send_whole(SOCKET skSocket, const char* data, uint16_t length)
 }
 
 void client::StartClient() {
-	// Implement client functionality here
+
 	std::cout << "Client is running...\n";
-	// Add code to communicate with the server
+	std::cout << "Enter the server address: \n";
+	std::cin >> address;
+
+	std::cout << "Enter the server port: \n";
+	std::cin >> port;
+
+	int initResult = init(port, const_cast<char*>(address.c_str()));
+	if (initResult == SUCCESS) {
+		std::cout << "Successfully connected to the server.\n";
+
+		std::cin.ignore(); // Ignore the newline character left in the buffer
+		std::cout << "Enter your message: ";
+		std::string userMessage;
+		std::getline(std::cin, userMessage);
+
+		// Call the sendMessage function with the user's message
+		int sendResult = sendMessage(const_cast<char*>(userMessage.c_str()), userMessage.length());
+
+		// Check the result of sending the message
+		if (sendResult == SUCCESS) {
+			std::cout << "Message sent successfully.\n";
+		}
+		else {
+			std::cout << "Error sending message. Code: " << sendResult << "\n";
+
+		}
+	}
+	else {
+		std::cout << "Error connecting to the server. Code: " << initResult << "\n";
+	}
 }
 
 int client::init(uint16_t port, char* address)
