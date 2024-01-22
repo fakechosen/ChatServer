@@ -40,3 +40,8 @@
 ChatServerApp/x64/
 ChatServerApp/ChatServerApp/x64/
 ChatServerApp/.vs/
+ChatServerApp/.vs/ChatServerApp/v17/.suo
+*.ilk
+*.idb
+*.pdb
+*.pdb
