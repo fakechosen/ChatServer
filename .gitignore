@@ -37,5 +37,6 @@
 *.db-wal
 *.opendb
 
-x64/
 ChatServerApp/x64/
+ChatServerApp/ChatServerApp/x64/
+ChatServerApp/.vs/
