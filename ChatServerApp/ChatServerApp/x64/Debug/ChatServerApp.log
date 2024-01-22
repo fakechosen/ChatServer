@@ -1,3 +1,4 @@
 ﻿  client.cpp
 C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\client.cpp(61,90): warning C4267: 'argument': conversion from 'size_t' to 'int32_t', possible loss of data
+  LINK : C:\Users\Jai\source\repos\ChatServer\ChatServerApp\x64\Debug\ChatServerApp.cpp.exe not found or not built by the last incremental link; performing full link
   ChatServerApp.vcxproj -> C:\Users\Jai\source\repos\ChatServer\ChatServerApp\x64\Debug\ChatServerApp.cpp.exe

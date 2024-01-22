@@ -65,7 +65,7 @@ void client::StartClient() {
 			std::cout << "Message sent successfully.\n";
 		}
 		else {
-			std::cout << "Error sending message. Code: " << sendResult << "\n";
+			std::cout << "Error sendinsage. Code: " << sendResult << "\n";
 
 		}
 	}

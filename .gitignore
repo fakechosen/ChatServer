@@ -45,3 +45,15 @@ ChatServerApp/.vs/ChatServerApp/v17/.suo
 *.idb
 *.pdb
 *.pdb
+*.tlog
+ChatServerApp/.vs/ChatServerApp/v17/.suo
+ChatServerApp/ChatServerApp/x64/Debug/ChatServ.13dc95f0.tlog/link.read.1.tlog
+ChatServerApp/ChatServerApp/x64/Debug/ChatServ.13dc95f0.tlog/link.write.1.tlog
+ChatServerApp/ChatServerApp/x64/Debug/ChatServerApp.cpp.ilk
+ChatServerApp/ChatServerApp/x64/Debug/ChatServerApp.log
+ChatServerApp/ChatServerApp/x64/Debug/vc143.idb
+ChatServerApp/ChatServerApp/x64/Debug/vc143.pdb
+ChatServerApp/x64/Debug/ChatServerApp.cpp.pdb
+*.log
+*.idb
+*.pdb
