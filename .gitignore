@@ -486,3 +486,8 @@ FodyWeavers.xsd
 
 # Blender backup files
 *.blend1
+
+
+/ChatServerApp/x64
+/ChatServerApp/ChatServerApp/x64
+/ChatServerApp/.vs
