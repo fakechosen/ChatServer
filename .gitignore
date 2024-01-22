@@ -36,3 +36,6 @@
 *.db-shm
 *.db-wal
 *.opendb
+
+x64/
+ChatServerApp/x64/
