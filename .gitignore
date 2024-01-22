@@ -31,7 +31,7 @@
 *.out
 *.app
 *.vsidx
-ChatServerApp/.vs/ChatServerApp/v17/.suo
+
 *.db
 *.db-shm
 *.db-wal
