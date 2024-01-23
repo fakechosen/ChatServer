@@ -4,41 +4,6 @@
 #include <string>
 #include "client.h"
 
-
-int tcp_recv_whole(SOCKET s, char* buf, int len)
-{
-	int total = 0;
-	do
-	{
-		int ret = recv(s, buf + total, len - total, 0);
-		if (ret < 1)
-			return ret;
-		else
-			total += ret;
-
-	} while (total < len);
-
-	return total;
-}
-
-int tcp_send_whole(SOCKET skSocket, const char* data, uint16_t length)
-{
-	int result;
-	int bytesSent = 0;
-
-	while (bytesSent < length)
-	{
-		result = send(skSocket, (const char*)data + bytesSent, length - bytesSent, 0);
-
-		if (result <= 0)
-			return result;
-
-		bytesSent += result;
-	}
-
-	return bytesSent;
-}
-
 void client::StartClient() {
 
 	std::cout << "Client is running...\n";
@@ -65,7 +30,7 @@ void client::StartClient() {
 			std::cout << "Message sent successfully.\n";
 		}
 		else {
-			std::cout << "Error sendinsage. Code: " << sendResult << "\n";
+			std::cout << "Error sending the message. Code: " << sendResult << "\n";
 
 		}
 	}
@@ -110,7 +75,7 @@ int client::init(uint16_t port, char* address)
 int client::readMessage(char* buffer, int32_t _size)
 {
 	uint8_t size = 0;
-	int result = tcp_recv_whole(comSocket, (char*)&size, 1);
+	int result = msgHandler.tcp_recv_whole(comSocket, (char*)&size, 1);
 	if (result == SOCKET_ERROR) {
 		return DISCONNECT;
 	}
@@ -122,7 +87,7 @@ int client::readMessage(char* buffer, int32_t _size)
 		return PARAMETER_ERROR;
 	}
 
-	result = tcp_recv_whole(comSocket, (char*)buffer, size);
+	result = msgHandler.tcp_recv_whole(comSocket, (char*)buffer, size);
 	if (result == SOCKET_ERROR) {
 		return DISCONNECT;
 	}
@@ -140,7 +105,7 @@ int client::sendMessage(char* data, int32_t length)
 	}
 
 	uint8_t size;
-	int result = tcp_send_whole(comSocket, (char*)&size, 1);
+	int result = msgHandler.tcp_send_whole(comSocket, (char*)&size, 1);
 
 	if (result == SOCKET_ERROR) {
 		return DISCONNECT;
@@ -149,7 +114,7 @@ int client::sendMessage(char* data, int32_t length)
 		return SHUTDOWN;
 	}
 
-	result = tcp_send_whole(comSocket, data, size);
+	result = msgHandler.tcp_send_whole(comSocket, data, size);
 
 	if (result == SOCKET_ERROR) {
 		return DISCONNECT;

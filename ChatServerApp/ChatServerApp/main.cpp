@@ -1,15 +1,14 @@
 // main.cpp : This file contains the 'main' function. Program execution begins and ends there.
 
-#define _WINSOCK_DEPRECATED_NO_WARNINGS         // turns of deprecated warnings for winsock
-
-#include <winsock2.h>
-#include <iostream>
 #include "client.h"
+#include "server.h"
+
+
 
 int main()
 {
 	WSADATA wsadata;
-	//WSAStartup(WINSOCK_VERSION, &wsadata);
+	WSAStartup(WINSOCK_VERSION, &wsadata);
 
 	int choice;
 
@@ -23,7 +22,10 @@ int main()
 	//Server
 	if (choice == 1)
 	{
-		std::cout << ("welcome server");
+		std::cout << ("welcome server\n");
+
+		server myServer;
+		myServer.StartServer();
 
 	}
 
@@ -36,6 +38,6 @@ int main()
 		myClient.StartClient();
 	}
 
-	//return WSACleanup();
+	return WSACleanup();
 }
 

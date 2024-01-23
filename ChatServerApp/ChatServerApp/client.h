@@ -1,9 +1,12 @@
 #pragma once
 #include "platform.h"
 #include "definitions.h"
+#include "handler.h"
 
 class client
 {
+	handler msgHandler;
+
 	SOCKET comSocket;
 
 	uint16_t port;
