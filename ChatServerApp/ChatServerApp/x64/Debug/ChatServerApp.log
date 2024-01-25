@@ -1,2 +1,9 @@
 ﻿  server.cpp
+C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(3,1): warning C4005: 'INET6_ADDRSTRLEN': macro redefinition
+  C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\shared\ws2ipdef.h(949,1):
+  see previous definition of 'INET6_ADDRSTRLEN'
+  
+C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(136,80): warning C4267: 'argument': conversion from 'size_t' to 'int32_t', possible loss of data
+C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(181,68): warning C4267: 'argument': conversion from 'size_t' to 'int32_t', possible loss of data
+C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(188,68): warning C4267: 'argument': conversion from 'size_t' to 'int32_t', possible loss of data
   ChatServerApp.vcxproj -> C:\Users\Jai\source\repos\ChatServer\ChatServerApp\x64\Debug\ChatServerApp.cpp.exe

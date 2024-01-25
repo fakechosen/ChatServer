@@ -33,3 +33,58 @@ int handler::tcp_send_whole(SOCKET skSocket, const char* data, uint16_t length)
 
 	return bytesSent;
 }
+
+int handler::readMessage(char* buffer, int32_t _size)
+{
+	uint8_t size = 0;
+	int result = tcp_recv_whole(comSocket, (char*)&size, 1);
+
+	if (result == SOCKET_ERROR) {
+		return DISCONNECT;
+	}
+	else if (result == 0) {
+		return SHUTDOWN;
+	}
+
+	if (size > _size) {
+		return PARAMETER_ERROR;
+	}
+
+	result = tcp_recv_whole(comSocket, (char*)buffer, size);
+	if (result == SOCKET_ERROR) {
+		return DISCONNECT;
+	}
+	else if (result == 0) {
+		return SHUTDOWN;
+	}
+
+	return SUCCESS;
+}
+
+int handler::sendMessage(char* data, int32_t length)
+{
+	if (length < 0 || length > 255) {
+		return PARAMETER_ERROR;
+	}
+
+	uint8_t size;
+
+	int result = tcp_send_whole(comSocket, (char*)&size, 1);
+	if (result == SOCKET_ERROR) {
+		std::cout << "SOCKET ERROR\n";
+		return DISCONNECT;
+	}
+	else if (result == 0) {
+		return SHUTDOWN;
+	}
+
+	result = tcp_send_whole(comSocket, data, size);
+	if (result == SOCKET_ERROR) {
+		return DISCONNECT;
+	}
+	else if (result == 0) {
+		return SHUTDOWN;
+	}
+
+	return SUCCESS;
+}
