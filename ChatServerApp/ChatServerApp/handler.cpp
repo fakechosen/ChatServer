@@ -34,10 +34,10 @@ int handler::tcp_send_whole(SOCKET skSocket, const char* data, uint16_t length)
 	return bytesSent;
 }
 
-int handler::readMessage(char* buffer, int32_t _size)
+int handler::readMessage(SOCKET clientSocket, char* buffer, int32_t _size)
 {
 	uint8_t size = 0;
-	int result = tcp_recv_whole(comSocket, (char*)&size, 1);
+	int result = tcp_recv_whole(clientSocket, (char*)&size, 1);
 
 	if (result == SOCKET_ERROR) {
 		return DISCONNECT;
@@ -50,7 +50,7 @@ int handler::readMessage(char* buffer, int32_t _size)
 		return PARAMETER_ERROR;
 	}
 
-	result = tcp_recv_whole(comSocket, (char*)buffer, size);
+	result = tcp_recv_whole(clientSocket, (char*)buffer, size);
 	if (result == SOCKET_ERROR) {
 		return DISCONNECT;
 	}
@@ -61,7 +61,7 @@ int handler::readMessage(char* buffer, int32_t _size)
 	return SUCCESS;
 }
 
-int handler::sendMessage(char* data, int32_t length)
+int handler::sendMessage(SOCKET clientSocket, char* data, int32_t length)
 {
 	if (length < 0 || length > 255) {
 		return PARAMETER_ERROR;
@@ -69,7 +69,7 @@ int handler::sendMessage(char* data, int32_t length)
 
 	uint8_t size;
 
-	int result = tcp_send_whole(comSocket, (char*)&size, 1);
+	int result = tcp_send_whole(clientSocket, (char*)&size, 1);
 	if (result == SOCKET_ERROR) {
 		std::cout << "SOCKET ERROR\n";
 		return DISCONNECT;
@@ -78,7 +78,7 @@ int handler::sendMessage(char* data, int32_t length)
 		return SHUTDOWN;
 	}
 
-	result = tcp_send_whole(comSocket, data, size);
+	result = tcp_send_whole(clientSocket, data, size);
 	if (result == SOCKET_ERROR) {
 		return DISCONNECT;
 	}

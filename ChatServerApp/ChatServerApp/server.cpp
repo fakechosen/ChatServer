@@ -100,7 +100,8 @@ int server::init(uint16_t port)
 	//		return CONNECT_ERROR;
 	//	}
 	//}
-
+	
+	std::cout << ("------------------------------------\n");
 	std::cout << "{ server initialized }\n";
 
 
@@ -126,14 +127,15 @@ int server::init(uint16_t port)
 		{
 			if (readySet.fd_array[i] == listenSocket) { //checking if there is a listensocket in readySet
 				if (FD_ISSET(listenSocket, &readySet)) {
-					msgHandler.comSocket = accept(listenSocket, NULL, NULL);
-					if (msgHandler.comSocket != INVALID_SOCKET) {
-						FD_SET(msgHandler.comSocket, &masterSet);
-						std::cout << "{ connection to new client established }\n";
+					SOCKET clientSocket = accept(listenSocket, NULL, NULL);
+					if (clientSocket != INVALID_SOCKET) {
+						FD_SET(clientSocket, &masterSet);
+						connectedSockets.push_back(clientSocket); // Add new client socket to the vector
+						std::cout << "\n{ connection to new client established }\n";
 
 						std::string responseMessage = "Welcome to the Server!\nTo issue commands use ";
 						responseMessage += commandChar;
-						msgHandler.sendMessage(const_cast<char*>(responseMessage.c_str()), strlen(const_cast<char*>(responseMessage.c_str())));
+						msgHandler.sendMessage(clientSocket, const_cast<char*>(responseMessage.c_str()), strlen(const_cast<char*>(responseMessage.c_str())));
 					}
 					else {
 						std::cerr << "Error in accept()\n";
@@ -141,22 +143,31 @@ int server::init(uint16_t port)
 					}
 				}
 			}
-			else if (FD_ISSET(msgHandler.comSocket, &readySet)) {
-				char buffer[256]; //max size of the message
-				int readNum = msgHandler.readMessage(buffer, sizeof(buffer));
+			else {
+				for (SOCKET clientSocket : connectedSockets) {
+					if (FD_ISSET(clientSocket, &readySet)) {
+						char buffer[256]; //max size of the message
+						int readNum = msgHandler.readMessage(clientSocket, buffer, sizeof(buffer));
 
-				if (readNum == DISCONNECT || readNum == SHUTDOWN) {
-					FD_CLR(msgHandler.comSocket, &masterSet);
-					closesocket(msgHandler.comSocket);
-					std::cout << "{ client disconnected }\n";
-				}
-				else if (readNum == PARAMETER_ERROR) {
-					std::cerr << "Error in reading message.\n";
-				}
-				else {
-					std::cout << "[Received message]: " << buffer << "\n";
-					if (buffer[0] == commandChar) {
-						ProcessCommand(buffer);
+						if (readNum == DISCONNECT || readNum == SHUTDOWN) {
+							FD_CLR(clientSocket, &masterSet);
+							closesocket(clientSocket);
+							std::cout << "\n{ client disconnected }\n";
+							// Remove the disconnected client socket from the vector
+							auto it = std::find(connectedSockets.begin(), connectedSockets.end(), clientSocket);
+							if (it != connectedSockets.end()) {
+								connectedSockets.erase(it);
+							}
+						}
+						else if (readNum == PARAMETER_ERROR) {
+							std::cerr << "Error in reading message.\n";
+						}
+						else {
+							std::cout << "[Received message]: " << buffer << "\n";
+							if (buffer[0] == commandChar) {
+								ProcessCommand(buffer, clientSocket);
+							}
+						}
 					}
 				}
 			}
@@ -166,7 +177,7 @@ int server::init(uint16_t port)
 	return SUCCESS;
 }
 
-void server::ProcessCommand(char* command) {
+void server::ProcessCommand(char* command, SOCKET clientSocket) {
 	std::cout << "\n-----command request initiated by the client-----\n";
 
 	std::string cmdStr(command);
@@ -178,14 +189,14 @@ void server::ProcessCommand(char* command) {
 		if (actualCommand == "help") {
 			std::string cmdmsg = "Available commands:\n/help - Shows list of the commands available\n/register {username} {password} - lets user(s) register themselves to the server\n";
 			std::cout << cmdmsg;
-			msgHandler.sendMessage(const_cast<char*>(cmdmsg.c_str()), strlen(const_cast<char*>(cmdmsg.c_str())));
+			msgHandler.sendMessage(clientSocket,const_cast<char*>(cmdmsg.c_str()), strlen(const_cast<char*>(cmdmsg.c_str())));
 
 		}
 		else {
 			std::string cmdmsg = " ! UNKNOWN COMMAND ! \n";
 			cmdmsg += "( /" + actualCommand + " ) does not exist, Try Again!";
 			std::cout << cmdmsg;
-			msgHandler.sendMessage(const_cast<char*>(cmdmsg.c_str()), strlen(const_cast<char*>(cmdmsg.c_str())));
+			msgHandler.sendMessage(clientSocket, const_cast<char*>(cmdmsg.c_str()), strlen(const_cast<char*>(cmdmsg.c_str())));
 			std::cout << "Unknown command: " << actualCommand << "\n";
 		}
 	}
@@ -201,6 +212,9 @@ void server::stop()
 	shutdown(listenSocket, SD_BOTH);
 	closesocket(listenSocket);
 
-	shutdown(msgHandler.comSocket, SD_BOTH);
-	closesocket(msgHandler.comSocket);
+	for (SOCKET clientSocket : connectedSockets) {
+		shutdown(clientSocket, SD_BOTH);
+		closesocket(clientSocket);
+	}
+	connectedSockets.clear(); // Clear the vector after closing all sockets
 }

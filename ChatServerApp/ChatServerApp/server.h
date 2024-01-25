@@ -18,13 +18,15 @@ class server
 
 	std::string hostname;
 
+	std::vector<SOCKET> connectedSockets; // to store client sockets
+
 public:
 	handler msgHandler;
 	char commandChar;
 
 	int StartServer();
 	int init(uint16_t port);
-	void ProcessCommand(char* command);
+	void ProcessCommand(char* command, SOCKET clientSocket);
 	void stop();
 
 };
