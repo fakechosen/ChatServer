@@ -1,5 +1,7 @@
 #include "server.h"
 #include <WS2tcpip.h>
+#include "sstream"
+
 #define INET6_ADDRSTRLEN 46
 
 int server::StartServer() {
@@ -100,13 +102,15 @@ int server::init(uint16_t port)
 	//		return CONNECT_ERROR;
 	//	}
 	//}
-	
+
 	std::cout << ("------------------------------------\n");
 	std::cout << "{ server initialized }\n";
 
 
 	FD_ZERO(&masterSet); //initializing the socket
 	FD_SET(listenSocket, &masterSet); //add the listening socket to masterSet
+
+	//int connectedClients = 0; //counter for connected clients
 
 	while (true) {
 
@@ -125,17 +129,21 @@ int server::init(uint16_t port)
 
 		for (int i = 0; i < readyfd; i++)
 		{
-			if (readySet.fd_array[i] == listenSocket) { //checking if there is a listensocket in readySet
+			if (readySet.fd_array[i] == listenSocket) { //checking if there is a listensocket in readySetB
 				if (FD_ISSET(listenSocket, &readySet)) {
 					SOCKET clientSocket = accept(listenSocket, NULL, NULL);
 					if (clientSocket != INVALID_SOCKET) {
 						FD_SET(clientSocket, &masterSet);
 						connectedSockets.push_back(clientSocket); // Add new client socket to the vector
-						std::cout << "\n{ connection to new client established }\n";
+						//connectedClients++;
+						std::cout << "\n{ connection to new client established }\n\n";
 
 						std::string responseMessage = "Welcome to the Server!\nTo issue commands use ";
-						responseMessage += commandChar;
+						responseMessage += commandChar; 
 						msgHandler.sendMessage(clientSocket, const_cast<char*>(responseMessage.c_str()), strlen(const_cast<char*>(responseMessage.c_str())));
+						std::string str1 = "\nand to checkout availabe commands use /help";
+						msgHandler.sendMessage(clientSocket, const_cast<char*>(str1.c_str()), strlen(const_cast<char*>(str1.c_str())));
+						//std::cout << responseMessage << " " << str1 << std::endl;
 					}
 					else {
 						std::cerr << "Error in accept()\n";
@@ -144,6 +152,7 @@ int server::init(uint16_t port)
 				}
 			}
 			else {
+				//std::cout << "{ Connection limit reached. Cannot accept new clients. }\n";
 				for (SOCKET clientSocket : connectedSockets) {
 					if (FD_ISSET(clientSocket, &readySet)) {
 						char buffer[256]; //max size of the message
@@ -157,6 +166,7 @@ int server::init(uint16_t port)
 							auto it = std::find(connectedSockets.begin(), connectedSockets.end(), clientSocket);
 							if (it != connectedSockets.end()) {
 								connectedSockets.erase(it);
+								//connectedClients--;
 							}
 						}
 						else if (readNum == PARAMETER_ERROR) {
@@ -187,17 +197,48 @@ void server::ProcessCommand(char* command, SOCKET clientSocket) {
 		std::string actualCommand = cmdStr.substr(1); // extracting the command removing the '/'
 
 		if (actualCommand == "help") {
-			std::string cmdmsg = "Available commands:\n/help - Shows list of the commands available\n/register {username} {password} - lets user(s) register themselves to the server\n";
-			std::cout << cmdmsg;
-			msgHandler.sendMessage(clientSocket,const_cast<char*>(cmdmsg.c_str()), strlen(const_cast<char*>(cmdmsg.c_str())));
+			std::string cmdmsg = "Available commands:\n/help - Shows list of the commands available\n/register username password - lets user(s) register themselves to the server\n\n";
+			std::cout << "\n" << cmdmsg << "\n";
+			msgHandler.sendMessage(clientSocket, const_cast<char*>(cmdmsg.c_str()), strlen(const_cast<char*>(cmdmsg.c_str())));
 
+		}
+		else if (actualCommand.find("register") == 0) {
+
+			std::istringstream ss(cmdStr); //parse the command to extract username and password
+			std::string token;
+			std::vector<std::string> tokens;
+			while (std::getline(ss, token, ' ')) {
+				tokens.push_back(token);
+			}
+			if (tokens.size() == 3) {
+				std::string username = tokens[1];
+				std::string password = tokens[2];
+
+				if (userCredentials.find(username) == userCredentials.end()) { 	//if check for username already exists
+					userCredentials[username] = password; //register user
+
+					std::string successMsg = "** Registration successful! **"; // Send a success message to the client
+					msgHandler.sendMessage(clientSocket, const_cast<char*>(successMsg.c_str()), strlen(const_cast<char*>(successMsg.c_str())));
+					std::cout << "\n" << successMsg << "\n";
+				}
+				else {
+					std::string failureMsg = "! Username already exists. Registration failed !"; // Send a failure message to the client (username already exists)
+					msgHandler.sendMessage(clientSocket, const_cast<char*>(failureMsg.c_str()), strlen(const_cast<char*>(failureMsg.c_str())));
+					std::cout << "\n" << failureMsg << "\n";
+				}
+			}
+			else {
+				std::string failureMsg = "! Invalid /register command format. Usage: /register username password"; // Send a failure message to the client (invalid command format)
+				msgHandler.sendMessage(clientSocket, const_cast<char*>(failureMsg.c_str()), strlen(const_cast<char*>(failureMsg.c_str())));
+				std::cout << "\n" << failureMsg << "\n";
+			}
 		}
 		else {
 			std::string cmdmsg = " ! UNKNOWN COMMAND ! \n";
-			cmdmsg += "( /" + actualCommand + " ) does not exist, Try Again!";
-			std::cout << cmdmsg;
+			cmdmsg += "( /" + actualCommand + " ) does not exist, Try Again!\n";
+			std::cout << "\n" << cmdmsg << "\n";
 			msgHandler.sendMessage(clientSocket, const_cast<char*>(cmdmsg.c_str()), strlen(const_cast<char*>(cmdmsg.c_str())));
-			std::cout << "Unknown command: " << actualCommand << "\n";
+			//std::cout << "Unknown command: " << actualCommand << "\n";
 		}
 	}
 	else {
