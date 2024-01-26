@@ -110,7 +110,7 @@ int server::init(uint16_t port)
 	FD_ZERO(&masterSet); //initializing the socket
 	FD_SET(listenSocket, &masterSet); //add the listening socket to masterSet
 
-	//int connectedClients = 0; //counter for connected clients
+	int connectedClients = 0; //counter for connected clients
 
 	while (true) {
 
@@ -130,29 +130,40 @@ int server::init(uint16_t port)
 		for (int i = 0; i < readyfd; i++)
 		{
 			if (readySet.fd_array[i] == listenSocket) { //checking if there is a listensocket in readySetB
-				if (FD_ISSET(listenSocket, &readySet)) {
-					SOCKET clientSocket = accept(listenSocket, NULL, NULL);
-					if (clientSocket != INVALID_SOCKET) {
-						FD_SET(clientSocket, &masterSet);
-						connectedSockets.push_back(clientSocket); // Add new client socket to the vector
-						//connectedClients++;
-						std::cout << "\n{ connection to new client established }\n\n";
-
-						std::string responseMessage = "Welcome to the Server!\nTo issue commands use ";
-						responseMessage += commandChar; 
-						msgHandler.sendMessage(clientSocket, const_cast<char*>(responseMessage.c_str()), strlen(const_cast<char*>(responseMessage.c_str())));
-						std::string str1 = "\nand to checkout availabe commands use /help";
-						msgHandler.sendMessage(clientSocket, const_cast<char*>(str1.c_str()), strlen(const_cast<char*>(str1.c_str())));
-						//std::cout << responseMessage << " " << str1 << std::endl;
-					}
-					else {
-						std::cerr << "Error in accept()\n";
-						break;
+				if (connectedClients < capacity) {
+					if (FD_ISSET(listenSocket, &readySet)) {
+						SOCKET clientSocket = accept(listenSocket, NULL, NULL);
+						if (clientSocket != INVALID_SOCKET) {
+							FD_SET(clientSocket, &masterSet);
+							connectedSockets.push_back(clientSocket); // Add new client socket to the vector
+							connectedClients++;
+							std::cout << "\n{ connection to new client established }\n\n";
+							std::string responseMessage = "Welcome to the Server!\nTo issue commands use ";
+							responseMessage += commandChar;
+							msgHandler.sendMessage(clientSocket, const_cast<char*>(responseMessage.c_str()), strlen(const_cast<char*>(responseMessage.c_str())));
+							std::string str1 = "\nand to checkout availabe commands use /help";
+							msgHandler.sendMessage(clientSocket, const_cast<char*>(str1.c_str()), strlen(const_cast<char*>(str1.c_str())));
+							//std::cout << responseMessage << " " << str1 << std::endl;
+						}
+						else {
+							std::cerr << "Error in accept()\n";
+							break;
+						}
 					}
 				}
+				else {
+					SOCKET clientSocket = accept(listenSocket, NULL, NULL);
+					std::string responseMsg = "{ Connection limit reached. Cannot accept new clients. }";
+					std::cout << responseMsg << std::endl;
+					msgHandler.sendMessage(clientSocket, const_cast<char*>(responseMsg.c_str()), strlen(const_cast<char*>(responseMsg.c_str())));
+
+					shutdown(clientSocket, SD_BOTH);
+					closesocket(clientSocket);
+				}
+
 			}
 			else {
-				//std::cout << "{ Connection limit reached. Cannot accept new clients. }\n";
+
 				for (SOCKET clientSocket : connectedSockets) {
 					if (FD_ISSET(clientSocket, &readySet)) {
 						char buffer[256]; //max size of the message
@@ -166,7 +177,7 @@ int server::init(uint16_t port)
 							auto it = std::find(connectedSockets.begin(), connectedSockets.end(), clientSocket);
 							if (it != connectedSockets.end()) {
 								connectedSockets.erase(it);
-								//connectedClients--;
+								connectedClients--;
 							}
 						}
 						else if (readNum == PARAMETER_ERROR) {

@@ -29,7 +29,7 @@ public:
 	int StartServer();
 	int init(uint16_t port);
 	void ProcessCommand(char* command, SOCKET clientSocket);
-	std::vector<std::string> SplitCommand(const std::string& command);
+
 	void stop();
 
 };
