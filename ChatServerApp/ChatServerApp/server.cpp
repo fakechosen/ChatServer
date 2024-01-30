@@ -187,6 +187,10 @@ int server::init(uint16_t port)
 							if (it != loggedInUsers.end()) {
 								std::string username = it->second;
 								std::cout << "[" << username << "]: " << buffer << "\n";
+								if (buffer[0] != commandChar) 
+								{ 
+									BroadcastMessage(buffer, clientSocket); 
+								}
 							}
 							else if(loggedInUsers.find(clientSocket) == loggedInUsers.end()){
 								std::cout << "[Received message]: " << buffer << "\n";
@@ -370,7 +374,6 @@ void server::SendCommand(const std::string& command, SOCKET senderSocket) {
 			if (pair.second == recipient) {
 				SOCKET recipientSocket = pair.first;
 
-				message += loggedInUsers[senderSocket];
 				msgHandler.sendMessage(recipientSocket, const_cast<char*>(message.c_str()), strlen(const_cast<char*>(message.c_str())));
 
 				std::cout << "[" << loggedInUsers[senderSocket] << " -> " << recipient << "]: " << message << "\n";
@@ -390,6 +393,15 @@ void server::SendCommand(const std::string& command, SOCKET senderSocket) {
 	}
 }
 
+void server::BroadcastMessage(const std::string& message, SOCKET senderSocket)
+{
+	for (const auto& pair : loggedInUsers) {
+		SOCKET clientSocket = pair.first;
+		if (clientSocket != senderSocket) {
+			msgHandler.sendMessage(clientSocket, const_cast<char*>(message.c_str()), strlen(const_cast<char*>(message.c_str())));
+		}
+	}
+}
 
 void server::stop()
 {

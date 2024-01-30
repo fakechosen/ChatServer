@@ -35,6 +35,7 @@ public:
 	void LoginCommand(std::string& username, std::string& password, SOCKET clientSocket);
 	void LogoutCommand(SOCKET clientSocket);
 	void SendCommand(const std::string& command, SOCKET senderSocket);
+	void BroadcastMessage(const std::string& message, SOCKET senderSocket);
 	void stop();
 
 };
