@@ -140,9 +140,9 @@ int server::init(uint16_t port)
 							std::cout << "\n{ connection to new client established }\n\n";
 							std::string responseMessage = "Welcome to the Server!\nTo issue commands use ";
 							responseMessage += commandChar;
+							responseMessage += "\nand to checkout available commands use /help";
 							msgHandler.sendMessage(clientSocket, const_cast<char*>(responseMessage.c_str()), strlen(const_cast<char*>(responseMessage.c_str())));
-							std::string str1 = "\nand to checkout availabe commands use /help";
-							msgHandler.sendMessage(clientSocket, const_cast<char*>(str1.c_str()), strlen(const_cast<char*>(str1.c_str())));
+
 							//std::cout << responseMessage << " " << str1 << std::endl;
 						}
 						else {
@@ -160,7 +160,6 @@ int server::init(uint16_t port)
 					shutdown(clientSocket, SD_BOTH);
 					closesocket(clientSocket);
 				}
-
 			}
 			else {
 
@@ -184,9 +183,22 @@ int server::init(uint16_t port)
 							std::cerr << "Error in reading message.\n";
 						}
 						else {
-							std::cout << "[Received message]: " << buffer << "\n";
+							auto it = loggedInUsers.find(clientSocket);
+							if (it != loggedInUsers.end()) {
+								std::string username = it->second;
+								std::cout << "[" << username << "]: " << buffer << "\n";
+							}
+							else if(loggedInUsers.find(clientSocket) == loggedInUsers.end()){
+								std::cout << "[Received message]: " << buffer << "\n";
+							}
+
 							if (buffer[0] == commandChar) {
 								ProcessCommand(buffer, clientSocket);
+							}
+							else if (buffer[0] != commandChar && loggedInUsers.find(clientSocket) == loggedInUsers.end()) {
+								std::string errorMsg = "! You must log in to send messages.";
+								msgHandler.sendMessage(clientSocket, const_cast<char*>(errorMsg.c_str()), strlen(const_cast<char*>(errorMsg.c_str())));
+								std::cout << "\n" << errorMsg << "\n";
 							}
 						}
 					}
@@ -208,7 +220,7 @@ void server::ProcessCommand(char* command, SOCKET clientSocket) {
 		std::string actualCommand = cmdStr.substr(1); // extracting the command removing the '/'
 
 		if (actualCommand == "help") {
-			std::string cmdmsg = "Available commands:\n/help - Shows list of the commands available\n/register username password - lets user(s) register themselves to the server\n\n";
+			std::string cmdmsg = "Available commands:\n/register username password - lets user register to the server\n/login username password - lets registered user login into server\n/logout - logs out user and terminates connection";
 			std::cout << "\n" << cmdmsg << "\n";
 			msgHandler.sendMessage(clientSocket, const_cast<char*>(cmdmsg.c_str()), strlen(const_cast<char*>(cmdmsg.c_str())));
 
@@ -244,6 +256,29 @@ void server::ProcessCommand(char* command, SOCKET clientSocket) {
 				std::cout << "\n" << failureMsg << "\n";
 			}
 		}
+		else if (actualCommand.find("login") == 0)
+		{
+			std::istringstream ss(cmdStr);
+			std::string token;
+			std::vector<std::string> tokens;
+			while (std::getline(ss, token, ' ')) {
+				tokens.push_back(token);
+			}
+			if (tokens.size() == 3) {
+				std::string username = tokens[1];
+				std::string password = tokens[2];
+				LoginCommand(username, password, clientSocket);
+			}
+			else {
+				std::string failureMsg = "! Invalid /login command format. Usage: /login username password";
+				msgHandler.sendMessage(clientSocket, const_cast<char*>(failureMsg.c_str()), strlen(const_cast<char*>(failureMsg.c_str())));
+				std::cout << "\n" << failureMsg << "\n";
+			}
+		}
+		else if (actualCommand.find("logout") == 0)
+		{
+			LogoutCommand(clientSocket);
+		}
 		else {
 			std::string cmdmsg = " ! UNKNOWN COMMAND ! \n";
 			cmdmsg += "( /" + actualCommand + " ) does not exist, Try Again!\n";
@@ -255,9 +290,68 @@ void server::ProcessCommand(char* command, SOCKET clientSocket) {
 	else {
 		//normal msg
 	}
-
-
 }
+
+void server::LoginCommand(std::string& username, std::string& password, SOCKET clientSocket) {
+
+	if (loggedInUsers.find(clientSocket) != loggedInUsers.end()) { 	//if the user is already logged in
+		std::string responseMsg = "! You are already logged in. Logout to login with a different user.";
+		msgHandler.sendMessage(clientSocket, const_cast<char*>(responseMsg.c_str()), strlen(const_cast<char*>(responseMsg.c_str())));
+		std::cout << "\n" << responseMsg << "\n";
+		return;
+	}
+
+	//checking if the user is already logged in from another client
+	for (const auto& pair : loggedInUsers) {
+		if (pair.second == username) {
+			std::string responseMsg = "! User is already logged in from another client.";
+			msgHandler.sendMessage(clientSocket, const_cast<char*>(responseMsg.c_str()), strlen(const_cast<char*>(responseMsg.c_str())));
+			std::cout << "\n" << responseMsg << "\n";
+			return;
+		}
+	}
+
+	auto it = userCredentials.find(username); //if the user exists and the password is correct
+	if (it != userCredentials.end() && it->second == password) {
+
+		loggedInUsers[clientSocket] = username;		//mark of that the user as logged in
+
+		std::string successMsg = "** Login successful! Welcome, " + username + " **";
+		msgHandler.sendMessage(clientSocket, const_cast<char*>(successMsg.c_str()), strlen(const_cast<char*>(successMsg.c_str())));
+		std::cout << "\n" << successMsg << "\n";
+	}
+	else {
+		std::string failureMsg = "! Login failed. User not found or incorrect password.";
+		msgHandler.sendMessage(clientSocket, const_cast<char*>(failureMsg.c_str()), strlen(const_cast<char*>(failureMsg.c_str())));
+		std::cout << "\n" << failureMsg << "\n";
+	}
+}
+
+void server::LogoutCommand(SOCKET clientSocket) {
+
+	auto it = loggedInUsers.find(clientSocket);
+	if (it != loggedInUsers.end()) {
+		std::string username = it->second;
+
+		std::string successMsg = "** Logout successful! Goodbye, " + username + "! **";
+		msgHandler.sendMessage(clientSocket, const_cast<char*>(successMsg.c_str()), strlen(const_cast<char*>(successMsg.c_str())));
+		std::cout << "\n" << successMsg << "\n";
+
+		loggedInUsers.erase(it); //remove the connected client
+
+		FD_CLR(clientSocket, &masterSet); // clear client socket from the set of monitored sockets
+		closesocket(clientSocket);
+		std::cout << "\n{ client disconnected gracefully }\n";
+
+	}
+	else {
+		std::string failureMsg = "! Logout failed. User not logged in !";
+		msgHandler.sendMessage(clientSocket, const_cast<char*>(failureMsg.c_str()), strlen(const_cast<char*>(failureMsg.c_str())));
+		std::cout << "\n" << failureMsg << "\n";
+	}
+}
+
+
 
 void server::stop()
 {
@@ -265,6 +359,7 @@ void server::stop()
 	closesocket(listenSocket);
 
 	for (SOCKET clientSocket : connectedSockets) {
+		FD_CLR(clientSocket, &loggedInUsers); //clear client sockets from the set of logged-in users
 		shutdown(clientSocket, SD_BOTH);
 		closesocket(clientSocket);
 	}

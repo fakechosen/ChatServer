@@ -3,12 +3,19 @@ C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(5,1)
   C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\shared\ws2ipdef.h(949,1):
   see previous definition of 'INET6_ADDRSTRLEN'
   
-C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(143,95): warning C4267: 'argument': conversion from 'size_t' to 'int32_t', possible loss of data
-C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(145,84): warning C4267: 'argument': conversion from 'size_t' to 'int32_t', possible loss of data
+C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(144,95): warning C4267: 'argument': conversion from 'size_t' to 'int32_t', possible loss of data
 C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(158,89): warning C4267: 'argument': conversion from 'size_t' to 'int32_t', possible loss of data
-C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(213,82): warning C4267: 'argument': conversion from 'size_t' to 'int32_t', possible loss of data
-C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(232,88): warning C4267: 'argument': conversion from 'size_t' to 'int32_t', possible loss of data
-C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(237,88): warning C4267: 'argument': conversion from 'size_t' to 'int32_t', possible loss of data
-C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(243,87): warning C4267: 'argument': conversion from 'size_t' to 'int32_t', possible loss of data
-C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(251,82): warning C4267: 'argument': conversion from 'size_t' to 'int32_t', possible loss of data
+C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(200,89): warning C4267: 'argument': conversion from 'size_t' to 'int32_t', possible loss of data
+C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(225,82): warning C4267: 'argument': conversion from 'size_t' to 'int32_t', possible loss of data
+C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(244,88): warning C4267: 'argument': conversion from 'size_t' to 'int32_t', possible loss of data
+C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(249,88): warning C4267: 'argument': conversion from 'size_t' to 'int32_t', possible loss of data
+C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(255,87): warning C4267: 'argument': conversion from 'size_t' to 'int32_t', possible loss of data
+C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(274,87): warning C4267: 'argument': conversion from 'size_t' to 'int32_t', possible loss of data
+C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(286,82): warning C4267: 'argument': conversion from 'size_t' to 'int32_t', possible loss of data
+C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(299,86): warning C4267: 'argument': conversion from 'size_t' to 'int32_t', possible loss of data
+C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(308,87): warning C4267: 'argument': conversion from 'size_t' to 'int32_t', possible loss of data
+C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(320,85): warning C4267: 'argument': conversion from 'size_t' to 'int32_t', possible loss of data
+C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(325,85): warning C4267: 'argument': conversion from 'size_t' to 'int32_t', possible loss of data
+C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(337,85): warning C4267: 'argument': conversion from 'size_t' to 'int32_t', possible loss of data
+C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(349,85): warning C4267: 'argument': conversion from 'size_t' to 'int32_t', possible loss of data
   ChatServerApp.vcxproj -> C:\Users\Jai\source\repos\ChatServer\ChatServerApp\x64\Debug\ChatServerApp.cpp.exe
