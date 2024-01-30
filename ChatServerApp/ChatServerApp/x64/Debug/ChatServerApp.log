@@ -11,11 +11,14 @@ C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(244,
 C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(249,88): warning C4267: 'argument': conversion from 'size_t' to 'int32_t', possible loss of data
 C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(255,87): warning C4267: 'argument': conversion from 'size_t' to 'int32_t', possible loss of data
 C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(274,87): warning C4267: 'argument': conversion from 'size_t' to 'int32_t', possible loss of data
-C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(286,82): warning C4267: 'argument': conversion from 'size_t' to 'int32_t', possible loss of data
-C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(299,86): warning C4267: 'argument': conversion from 'size_t' to 'int32_t', possible loss of data
-C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(308,87): warning C4267: 'argument': conversion from 'size_t' to 'int32_t', possible loss of data
-C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(320,85): warning C4267: 'argument': conversion from 'size_t' to 'int32_t', possible loss of data
-C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(325,85): warning C4267: 'argument': conversion from 'size_t' to 'int32_t', possible loss of data
-C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(337,85): warning C4267: 'argument': conversion from 'size_t' to 'int32_t', possible loss of data
-C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(349,85): warning C4267: 'argument': conversion from 'size_t' to 'int32_t', possible loss of data
+C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(289,82): warning C4267: 'argument': conversion from 'size_t' to 'int32_t', possible loss of data
+C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(302,86): warning C4267: 'argument': conversion from 'size_t' to 'int32_t', possible loss of data
+C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(311,87): warning C4267: 'argument': conversion from 'size_t' to 'int32_t', possible loss of data
+C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(323,85): warning C4267: 'argument': conversion from 'size_t' to 'int32_t', possible loss of data
+C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(328,85): warning C4267: 'argument': conversion from 'size_t' to 'int32_t', possible loss of data
+C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(340,85): warning C4267: 'argument': conversion from 'size_t' to 'int32_t', possible loss of data
+C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(352,85): warning C4267: 'argument': conversion from 'size_t' to 'int32_t', possible loss of data
+C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(374,87): warning C4267: 'argument': conversion from 'size_t' to 'int32_t', possible loss of data
+C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(383,86): warning C4267: 'argument': conversion from 'size_t' to 'int32_t', possible loss of data
+C:\Users\Jai\source\repos\ChatServer\ChatServerApp\ChatServerApp\server.cpp(388,85): warning C4267: 'argument': conversion from 'size_t' to 'int32_t', possible loss of data
   ChatServerApp.vcxproj -> C:\Users\Jai\source\repos\ChatServer\ChatServerApp\x64\Debug\ChatServerApp.cpp.exe

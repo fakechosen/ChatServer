@@ -279,6 +279,9 @@ void server::ProcessCommand(char* command, SOCKET clientSocket) {
 		{
 			LogoutCommand(clientSocket);
 		}
+		else if (actualCommand.find("send") == 0) {
+			SendCommand(actualCommand, clientSocket);
+		}
 		else {
 			std::string cmdmsg = " ! UNKNOWN COMMAND ! \n";
 			cmdmsg += "( /" + actualCommand + " ) does not exist, Try Again!\n";
@@ -351,6 +354,41 @@ void server::LogoutCommand(SOCKET clientSocket) {
 	}
 }
 
+void server::SendCommand(const std::string& command, SOCKET senderSocket) {
+	std::istringstream ss(command);
+	std::string token;
+	std::vector<std::string> tokens;
+	while (std::getline(ss, token, ' ')) {
+		tokens.push_back(token);
+	}
+
+	if (tokens.size() >= 3) {
+		std::string recipient = tokens[1];
+		std::string message = command.substr(command.find(tokens[2]));
+
+		for (const auto& pair : loggedInUsers) { //find targetted client in loggedInUsers
+			if (pair.second == recipient) {
+				SOCKET recipientSocket = pair.first;
+
+				message += loggedInUsers[senderSocket];
+				msgHandler.sendMessage(recipientSocket, const_cast<char*>(message.c_str()), strlen(const_cast<char*>(message.c_str())));
+
+				std::cout << "[" << loggedInUsers[senderSocket] << " -> " << recipient << "]: " << message << "\n";
+				return;
+			}
+		}
+
+		//if the recipient is not found, inform back to the sender
+		std::string responseMsg = "! User '" + recipient + "' not found or not logged in.";
+		msgHandler.sendMessage(senderSocket, const_cast<char*>(responseMsg.c_str()), strlen(const_cast<char*>(responseMsg.c_str())));
+		std::cout << "\n" << responseMsg << "\n";
+	}
+	else {
+		std::string failureMsg = "! Invalid /send command format. Usage: /send username message";
+		msgHandler.sendMessage(senderSocket, const_cast<char*>(failureMsg.c_str()), strlen(const_cast<char*>(failureMsg.c_str())));
+		std::cout << "\n" << failureMsg << "\n";
+	}
+}
 
 
 void server::stop()

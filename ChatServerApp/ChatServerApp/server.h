@@ -23,6 +23,7 @@ class server
 
 	std::unordered_map<std::string, std::string> userCredentials; // Map to store usernames and passwords
 	std::unordered_map<SOCKET, std::string> loggedInUsers; // Map to store logged-in users
+	
 
 public:
 	handler msgHandler;
@@ -33,6 +34,7 @@ public:
 	void ProcessCommand(char* command, SOCKET clientSocket);
 	void LoginCommand(std::string& username, std::string& password, SOCKET clientSocket);
 	void LogoutCommand(SOCKET clientSocket);
+	void SendCommand(const std::string& command, SOCKET senderSocket);
 	void stop();
 
 };
