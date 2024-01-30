@@ -1,10 +1,8 @@
 // main.cpp : This file contains the 'main' function. Program execution begins and ends there.
 
-#include "client.h"
 #include "server.h"
 
 server myServer;
-client myClient;
 
 int main()
 {

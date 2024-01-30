@@ -224,7 +224,7 @@ void server::ProcessCommand(char* command, SOCKET clientSocket) {
 		std::string actualCommand = cmdStr.substr(1); // extracting the command removing the '/'
 
 		if (actualCommand == "help") {
-			std::string cmdmsg = "Available commands:\n/register username password - lets user register to the server\n/login username password - lets registered user login into server\n/logout - logs out user and terminates connection";
+			std::string cmdmsg = "commands:\n/register username password - registeration\n/login username password - login\n/logout - logs out & end connection\n/send username msg - private dms\n/getlist - connected users\n";
 			std::cout << "\n" << cmdmsg << "\n";
 			msgHandler.sendMessage(clientSocket, const_cast<char*>(cmdmsg.c_str()), strlen(const_cast<char*>(cmdmsg.c_str())));
 
@@ -285,6 +285,10 @@ void server::ProcessCommand(char* command, SOCKET clientSocket) {
 		}
 		else if (actualCommand.find("send") == 0) {
 			SendCommand(actualCommand, clientSocket);
+		}
+		else if ( actualCommand.find("getlist") == 0)
+		{
+			GetListCommand(clientSocket);
 		}
 		else {
 			std::string cmdmsg = " ! UNKNOWN COMMAND ! \n";
@@ -401,6 +405,15 @@ void server::BroadcastMessage(const std::string& message, SOCKET senderSocket)
 			msgHandler.sendMessage(clientSocket, const_cast<char*>(message.c_str()), strlen(const_cast<char*>(message.c_str())));
 		}
 	}
+}
+
+void server::GetListCommand(SOCKET senderSocket) {
+	std::string userList = "Connected users:";
+	for (const auto& pair : loggedInUsers) {
+		userList += "\n- " + pair.second;
+	}
+	msgHandler.sendMessage(senderSocket, const_cast<char*>(userList.c_str()), strlen(const_cast<char*>(userList.c_str())));
+	std::cout << userList << std::endl;
 }
 
 void server::stop()

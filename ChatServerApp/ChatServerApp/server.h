@@ -2,13 +2,13 @@
 #include "platform.h"
 #include "definitions.h"
 #include "handler.h"
-#include "client.h"
+
 #include <unordered_map>
 #include <unordered_set>
 
 class server
 {
-	client myClient;
+
 
 	fd_set masterSet; // containing all the sockets that the server is monitoring
 	fd_set readySet;  // containing the sockets that are ready for reading or writing
@@ -36,6 +36,7 @@ public:
 	void LogoutCommand(SOCKET clientSocket);
 	void SendCommand(const std::string& command, SOCKET senderSocket);
 	void BroadcastMessage(const std::string& message, SOCKET senderSocket);
+	void GetListCommand(SOCKET senderSocket);
 	void stop();
 
 };
