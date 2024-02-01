@@ -1,10 +1,22 @@
+#pragma warning(disable : 4996) //_CRT_SECURE_NO_WARNINGS
+
 #include "server.h"
 #include <WS2tcpip.h>
 #include "sstream"
 
 #define INET6_ADDRSTRLEN 46
 
+char ipstr[INET6_ADDRSTRLEN];
+
 int server::StartServer() {
+
+	registeredUsersCount = 0; //initialize registered users
+
+	ClearLogs();
+
+	userCommandsLogFile.open("user_commands.log", std::ios::app);
+	publicMessagesLogFile.open("public_messages.log", std::ios::app);
+
 
 	//local host name
 	gethostname(const_cast<char*>(hostname.c_str()), 128);
@@ -12,7 +24,6 @@ int server::StartServer() {
 
 	struct addrinfo hints, * res, * p;
 	int status;
-	char ipstr[INET6_ADDRSTRLEN];
 
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_UNSPEC; // Use AF_INET for IPv4, AF_INET6 for IPv6
@@ -43,6 +54,9 @@ int server::StartServer() {
 		std::cout << " " << ipver << ": " << ipstr << "\n";
 	}
 	freeaddrinfo(res); // free the linked list
+
+
+
 
 
 	std::cout << ("------------------------------------\n");
@@ -90,19 +104,6 @@ int server::init(uint16_t port)
 		return SETUP_ERROR;
 	}
 
-	//comSocket = accept(listenSocket, NULL, NULL);
-	//if (comSocket == INVALID_SOCKET)
-	//{
-	//	if (WSAGetLastError() == WSAESHUTDOWN)
-	//	{
-	//		return SHUTDOWN;
-	//	}
-	//	else
-	//	{
-	//		return CONNECT_ERROR;
-	//	}
-	//}
-
 	std::cout << ("------------------------------------\n");
 	std::cout << "{ server initialized }\n";
 
@@ -110,7 +111,12 @@ int server::init(uint16_t port)
 	FD_ZERO(&masterSet); //initializing the socket
 	FD_SET(listenSocket, &masterSet); //add the listening socket to masterSet
 
+
 	int connectedClients = 0; //counter for connected clients
+
+	//udp broadcast thread
+	std::thread udpthread(&server::StartUDPBroadcast, this, port, ipstr);
+	udpthread.detach();
 
 	while (true) {
 
@@ -189,7 +195,7 @@ int server::init(uint16_t port)
 								std::cout << "[" << username << "]: " << buffer << "\n";
 								if (buffer[0] != commandChar) 
 								{ 
-									BroadcastMessage(buffer, clientSocket); 
+									RelayMessage(buffer, clientSocket); 
 								}
 							}
 							else if(loggedInUsers.find(clientSocket) == loggedInUsers.end()){
@@ -198,11 +204,23 @@ int server::init(uint16_t port)
 
 							if (buffer[0] == commandChar) {
 								ProcessCommand(buffer, clientSocket);
+
+								auto it = loggedInUsers.find(clientSocket);
+								if (it != loggedInUsers.end()) {
+									//user exists
+									LogUserCommand(buffer, it->second);
+								}
+								else {
+									//USER DOES NOT EXIST
+									LogUserCommand(buffer, "Unregistered User");
+								}
 							}
 							else if (buffer[0] != commandChar && loggedInUsers.find(clientSocket) == loggedInUsers.end()) {
 								std::string errorMsg = "! You must log in to send messages.";
 								msgHandler.sendMessage(clientSocket, const_cast<char*>(errorMsg.c_str()), strlen(const_cast<char*>(errorMsg.c_str())));
 								std::cout << "\n" << errorMsg << "\n";
+
+								LogPublicMessage(buffer, "UNKNOWN_USER");
 							}
 						}
 					}
@@ -241,9 +259,17 @@ void server::ProcessCommand(char* command, SOCKET clientSocket) {
 				std::string username = tokens[1];
 				std::string password = tokens[2];
 
-				if (userCredentials.find(username) == userCredentials.end()) { 	//if check for username already exists
+				if (IsRegistrationLimitReached()) {
+					std::string responseMsg = "! Registration limit reached. Cannot register more users.";
+					msgHandler.sendMessage(clientSocket, const_cast<char*>(responseMsg.c_str()), strlen(const_cast<char*>(responseMsg.c_str())));
+					std::cout << "\n" << responseMsg << "\n";
+				}
+				else if (userCredentials.find(username) == userCredentials.end()) 
+				{ 	//if check for username already exists
 					userCredentials[username] = password; //register user
-
+					
+					registeredUsersCount++;
+					
 					std::string successMsg = "** Registration successful! **"; // Send a success message to the client
 					msgHandler.sendMessage(clientSocket, const_cast<char*>(successMsg.c_str()), strlen(const_cast<char*>(successMsg.c_str())));
 					std::cout << "\n" << successMsg << "\n";
@@ -289,6 +315,12 @@ void server::ProcessCommand(char* command, SOCKET clientSocket) {
 		else if ( actualCommand.find("getlist") == 0)
 		{
 			GetListCommand(clientSocket);
+		}
+		else if (actualCommand.find("getlog") == 0) {
+			std::string filecheck;
+			filecheck = "Please check the following files in the folder:\n- user_commands.log\n- public_messages.log";
+			msgHandler.sendMessage(clientSocket, const_cast<char*>(filecheck.c_str()), strlen(const_cast<char*>(filecheck.c_str())));
+			std::cout << "\n" << filecheck << "\n";
 		}
 		else {
 			std::string cmdmsg = " ! UNKNOWN COMMAND ! \n";
@@ -397,7 +429,7 @@ void server::SendCommand(const std::string& command, SOCKET senderSocket) {
 	}
 }
 
-void server::BroadcastMessage(const std::string& message, SOCKET senderSocket)
+void server::RelayMessage(const std::string& message, SOCKET senderSocket)
 {
 	for (const auto& pair : loggedInUsers) {
 		SOCKET clientSocket = pair.first;
@@ -405,6 +437,7 @@ void server::BroadcastMessage(const std::string& message, SOCKET senderSocket)
 			msgHandler.sendMessage(clientSocket, const_cast<char*>(message.c_str()), strlen(const_cast<char*>(message.c_str())));
 		}
 	}
+	LogPublicMessage(message, loggedInUsers[senderSocket]);
 }
 
 void server::GetListCommand(SOCKET senderSocket) {
@@ -416,10 +449,99 @@ void server::GetListCommand(SOCKET senderSocket) {
 	std::cout << userList << std::endl;
 }
 
+bool server::IsRegistrationLimitReached() {
+	return (registeredUsersCount >= capacity);
+}
+
+void server::LogUserCommand(const std::string& command, const std::string& username) {
+	if (userCommandsLogFile.is_open()) {
+
+		userCommandsLogFile << getTime() << " | ";
+		userCommandsLogFile << "[" << username << "]: " << command << "\n";
+		userCommandsLogFile.flush();
+	}
+}
+
+void server::LogPublicMessage(const std::string& message, const std::string& sender) {
+	if (publicMessagesLogFile.is_open()) {
+
+		publicMessagesLogFile << getTime() << " | ";
+		publicMessagesLogFile << "[" << sender << "]: " << message << "\n";
+		publicMessagesLogFile.flush();
+	}
+}
+
+void server::ClearLogs()
+{
+	userCommandsLogFile.open("user_commands.log", std::ofstream::out | std::ofstream::trunc);
+	userCommandsLogFile.close();
+
+	publicMessagesLogFile.open("public_messages.log", std::ofstream::out | std::ofstream::trunc);
+	publicMessagesLogFile.close();
+}
+
+std::string server::getTime()
+{
+	time_t rawtime;
+	struct tm* timeinfo;
+	char buffer[80];
+
+	time(&rawtime);
+	timeinfo = localtime(&rawtime);
+
+	strftime(buffer, sizeof(buffer), "%d-%m-%Y %H:%M:%S", timeinfo);
+	std::string str(buffer);
+
+	return str;
+}
+
+void server::StartUDPBroadcast(int port, const std::string& ipAddress)
+{
+	int val = 1;
+	SOCKET udpsock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+	int socketset = setsockopt(udpsock, SOL_SOCKET, SO_BROADCAST, (char*)&val, sizeof(val));
+
+	sockaddr_in saddr;
+	saddr.sin_family = AF_INET;
+	saddr.sin_addr.s_addr = INADDR_BROADCAST;
+	saddr.sin_port = htons(port);
+
+	inet_pton(AF_INET, ipAddress.c_str(), &(saddr.sin_addr));
+
+	std::string broadcastMessage = "Server IP address: " + ipAddress + " | Port: " + std::to_string(port);
+
+	while (true)
+	{
+		int result = sendto(udpsock, broadcastMessage.c_str(), broadcastMessage.length(), 0,
+			(sockaddr*)&saddr, sizeof(saddr));
+
+		if (result == SOCKET_ERROR)
+		{
+			std::cerr << "Error sending UDP broadcast\n";
+		}
+
+		std::cout << "UDP Broadcast done\n";
+
+		std::this_thread::sleep_for(std::chrono::seconds(30)); // Sleep for 30 seconds before the next broadcast
+	}
+
+	//close the socket if needed
+	shutdown(udpsock, SD_BOTH);
+	closesocket(udpsock);
+}
+
 void server::stop()
 {
 	shutdown(listenSocket, SD_BOTH);
 	closesocket(listenSocket);
+
+	if (userCommandsLogFile.is_open()) {
+		userCommandsLogFile.close();
+	}
+
+	if (publicMessagesLogFile.is_open()) {
+		publicMessagesLogFile.close();
+	}
 
 	for (SOCKET clientSocket : connectedSockets) {
 		FD_CLR(clientSocket, &loggedInUsers); //clear client sockets from the set of logged-in users
