@@ -499,14 +499,14 @@ void server::StartUDPBroadcast(int port, const std::string& ipAddress)
 {
 	int val = 1;
 	SOCKET udpsock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-	int socketset = setsockopt(udpsock, SOL_SOCKET, SO_BROADCAST, (char*)&val, sizeof(val));
+	setsockopt(udpsock, SOL_SOCKET, SO_BROADCAST, (char*)&val, sizeof(val));
 
 	sockaddr_in saddr;
 	saddr.sin_family = AF_INET;
 	saddr.sin_addr.s_addr = INADDR_BROADCAST;
 	saddr.sin_port = htons(port);
 
-	inet_pton(AF_INET, ipAddress.c_str(), &(saddr.sin_addr));
+//	inet_pton(AF_INET, ipAddress.c_str(), &(saddr.sin_addr));
 
 	std::string broadcastMessage = "Server IP address: " + ipAddress + " | Port: " + std::to_string(port);
 
@@ -517,15 +517,16 @@ void server::StartUDPBroadcast(int port, const std::string& ipAddress)
 
 		if (result == SOCKET_ERROR)
 		{
+			int err = WSAGetLastError();
 			std::cerr << "Error sending UDP broadcast\n";
 		}
 
 		std::cout << "UDP Broadcast done\n";
 
-		std::this_thread::sleep_for(std::chrono::seconds(30)); // Sleep for 30 seconds before the next broadcast
+		std::this_thread::sleep_for(std::chrono::seconds(30)); //30 seconds sleep till next cout
 	}
 
-	//close the socket if needed
+	// Close the socket if needed
 	shutdown(udpsock, SD_BOTH);
 	closesocket(udpsock);
 }
