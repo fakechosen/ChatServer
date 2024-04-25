@@ -17,5 +17,5 @@ The Chat Server Console Project provides an opportunity to apply one's C/C++ pro
 
 ## Demonstrations
 check out these videos to see this project in action
-- Part 1:
-- Part 2:
+- Part 1: https://youtu.be/IHAMAOqEL_Y?si=a0mtCfWbNSYJI8kD
+- Part 2: https://youtu.be/bK0Zl49x4BA?si=Nn9y64sey5Bhg4RU
