@@ -1,6 +1,6 @@
-# Chat Server Console Project
+# Console Chat Server Project
 
-The Chat Server Console Project is a robust server console application developed in C++ that facilitates seamless communication between multiple clients. The project leverages the TCP transport protocol to ensure guaranteed and in-order delivery of chat messages, crucial for maintaining the integrity of communication in a chat environment.
+The Console Chat Server Project is a robust server console application developed in C++ that facilitates seamless communication between multiple clients. The project leverages the TCP transport protocol to ensure guaranteed and in-order delivery of chat messages, crucial for maintaining the integrity of communication in a chat environment.
 
 ## Project Objectives
 - **Utilizing TCP Transport Protocol:** The project primarily focuses on utilizing the TCP transport protocol to ensure guaranteed and in-order data delivery. This choice is particularly relevant for chat functionality, where dropped messages or out-of-order delivery is undesirable.
@@ -13,7 +13,7 @@ The Chat Server Console Project is a robust server console application developed
 - **Enhancing Project and Time Management Skills:** Developing a functional and performant chat server requires effective project and time management skills. Through this project, I had the opportunity to hone these skills while working towards achieving the specified objectives.
 
 ## Conclusion
-The Chat Server Console Project provides an opportunity to apply one's C++ programming skills in a practical context, while also gaining valuable insights into networking protocols and communication mechanisms. The ultimate goal was to create a functional and efficient chat server that meets the specified objectives, contributing to the broader understanding of networked applications.
+The Console Chat Server Project provides an opportunity to apply one's C++ programming skills in a practical context, while also gaining valuable insights into networking protocols and communication mechanisms. The ultimate goal was to create a functional and efficient chat server that meets the specified objectives, contributing to the broader understanding of networked applications.
 
 ## Demonstrations
 check out these videos to see this project in action
